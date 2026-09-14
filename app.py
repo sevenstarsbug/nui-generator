@@ -54,7 +54,7 @@ if st.button("✨ アイデアを出す", type="primary", use_container_width=Tr
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
+            model = genai.GenerativeModel("gemini-3.6-flash")
 
             prompt = f"""
 あなたは推しぬい(棉花娃娃/無属性オリジナルぬいぐるみ)のデザイナーです。以下の条件に合うモチーフ案を{count_val}個、日本語で考えてください。

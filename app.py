@@ -8,11 +8,11 @@ st.set_page_config(page_title="ぬいモチーフ・ジェネレーター", page
 st.title("✂️ ぬいモチーフ・ジェネレーター")
 st.caption("条件を選ぶと、ぬいぐるみ本体のモチーフ案と似合う衣装案を提案します")
 
-# --- サイドバー：Gemini APIキーの設定 ---
-with st.sidebar:
-    st.header("設定")
-    api_key = st.text_input("Gemini API Key を入力", type="password")
-    st.markdown("[APIキーの取得はこちらから](https://aistudio.google.com/app/apikey)")
+# --- SecretsからAPIキーを取得 ---
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    api_key = None
 
 # --- 入力フォーム ---
 st.subheader("条件を選択してください")
@@ -50,7 +50,7 @@ note_val = st.text_input("追加の要望（任意）", placeholder="例: ゆめ
 # --- アイデア生成処理 ---
 if st.button("✨ アイデアを出す", type="primary", use_container_width=True):
     if not api_key:
-        st.error("左側のサイドバーに Gemini API Key を入力してください。")
+        st.error("APIキーが設定されていません。StreamlitのSecrets設定を確認してください。")
     else:
         try:
             genai.configure(api_key=api_key)

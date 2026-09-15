@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import json
 
 # --- ページの設定 ---
@@ -45,7 +46,15 @@ with col2:
 
     count_val = st.radio("提案数", [3, 5], horizontal=True)
 
-note_val = st.text_input("追加の要望（任意）", placeholder="例: ゆめかわ系、クラシック系など")
+note_val = st.text_input("追加の要望（任意）", placeholder="例: クラシック系、メルヘンなど")
+
+# --- セーフティ設定（誤ブロックを防ぐ） ---
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+}
 
 # --- アイデア生成処理 ---
 if st.button("✨ アイデアを出す", type="primary", use_container_width=True):
@@ -67,8 +76,8 @@ if st.button("✨ アイデアを出す", type="primary", use_container_width=Tr
 - 色の指定: {color_val}
 {f"- 追加の要望: {note_val}" if note_val else ""}
 
-このぬいぐるみは着せ替え前提で、何も着せていない裸のボディの状態を想定しています。
-descriptionには衣装・服・アクセサリーの話は一切含めず、肌の質感、目の色や形、耳・角・尻尾・羽などのパーツ、髪(ある場合)、ボディの配色や雰囲気だけを描写してください。
+このぬいぐるみは着せ替え用ぬいぐるみとして、服を着ていない素体(ベースボディ)の状態を想定しています。
+descriptionには衣装・洋服・アクセサリーの話は一切含めず、肌の質感、目の色や形、耳・角・尻尾・羽などのパーツ、髪(ある場合)、ボディの配色や雰囲気だけを描写してください。
 
 次のJSON配列だけを出力してください。前置き、説明、コードブロックの記号(```)は一切つけないでください。
 [
@@ -81,7 +90,10 @@ descriptionには衣装・服・アクセサリーの話は一切含めず、肌
 ]
 """
             with st.spinner("AIがアイデアを考案中..."):
-                response = model.generate_content(prompt)
+                response = model.generate_content(
+                    prompt,
+                    safety_settings=safety_settings
+                )
                 cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
                 ideas = json.loads(cleaned_text)
 
@@ -100,3 +112,4 @@ descriptionには衣装・服・アクセサリーの話は一切含めず、肌
 
         except Exception as e:
             st.error(f"エラーが発生しました: {e}")
+
